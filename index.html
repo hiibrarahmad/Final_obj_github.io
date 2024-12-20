@@ -2,92 +2,69 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>3D Model Viewer with Rotating Box</title>
+    <title>3D Rotating Cube</title>
     <style>
       body {
         margin: 0;
-        padding: 0;
-        background: black;
-        font-family: Arial, sans-serif;
-      }
-      #viewer {
-        width: 100%;
-        height: 100vh;
         overflow: hidden;
       }
-      #details-panel {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 14px;
+      #viewer {
+        width: 100vw;
+        height: 100vh;
       }
     </style>
   </head>
   <body>
     <div id="viewer"></div>
-
-    <!-- Details Panel -->
-    <div id="details-panel">
-      <p><strong>Model Details:</strong></p>
-      <p id="model-name">Name: 3D Box</p>
-      <p id="model-size">Size: 1x1x1</p>
-      <p id="model-material">Material: Basic</p>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
     <script>
-      // Scene Setup
+      // Scene setup
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x202020);
 
-      // Camera Setup
+      // Camera setup
       const camera = new THREE.PerspectiveCamera(
-        75, // Field of view
+        75, // FOV
         window.innerWidth / window.innerHeight, // Aspect ratio
-        0.1, // Near clipping plane
-        1000 // Far clipping plane
+        0.1, // Near clipping
+        1000 // Far clipping
       );
       camera.position.z = 5;
 
-      // Renderer Setup
+      // Renderer setup
       const renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      document.getElementById('viewer').appendChild(renderer.domElement);
+      document.body.appendChild(renderer.domElement);
 
-      // Create a 3D Box
-      const geometry = new THREE.BoxGeometry(1, 1, 1); // Box dimensions: 1x1x1
-      const material = new THREE.MeshBasicMaterial({ color: 0x3cb371, wireframe: false });
+      // Create a cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
 
-      // Add Light (if using a material that needs light)
-      const light = new THREE.PointLight(0xffffff, 1, 100); // White light
-      light.position.set(5, 5, 5); // Light position
+      // Add a basic light for better visibility
+      const light = new THREE.AmbientLight(0xffffff); // White light
       scene.add(light);
 
-      // Animation Loop
+      // Animation loop
       function animate() {
         requestAnimationFrame(animate);
 
-        // Rotate the cube
+        // Rotate cube
         cube.rotation.x += 0.01;
         cube.rotation.y += 0.01;
 
+        // Render scene
         renderer.render(scene, camera);
       }
 
-      // Resize Handler
-      window.addEventListener('resize', () => {
+      // Ensure responsive rendering
+      window.addEventListener("resize", () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
       });
 
-      // Start Animation
+      // Start animation
       animate();
     </script>
   </body>
