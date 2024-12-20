@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Javascript 3D Model Viewer</title>
+    <title>3D Model Viewer</title>
     <style>
       body {
         margin: 0;
@@ -11,10 +11,10 @@
         font-family: Arial, sans-serif;
       }
       #viewer {
-        width: 100%; 
-        height: 100vh; /* Full-screen height */
-        background: #000;
+        width: 100%;
+        height: 100vh;
         position: relative;
+        background: #000;
       }
       #progress-container {
         width: 60%;
@@ -39,20 +39,6 @@
         transform: translate(-50%, -50%);
         z-index: 10;
       }
-      #rotation-cube {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 100px;
-        height: 100px;
-        border: 2px solid #3CB371;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        text-align: center;
-        line-height: 100px;
-        cursor: pointer;
-        font-weight: bold;
-      }
       #details-panel {
         position: absolute;
         bottom: 20px;
@@ -63,6 +49,19 @@
         border-radius: 8px;
         font-size: 14px;
       }
+      #rotation-cube {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid #3CB371;
+        cursor: pointer;
+      }
+      canvas {
+        display: block;
+      }
     </style>
   </head>
 
@@ -70,7 +69,7 @@
     <!-- Viewer -->
     <div id="viewer">
       <!-- Rotation Cube -->
-      <div id="rotation-cube">↻ Rotate</div>
+      <div id="rotation-cube"></div>
       <!-- Details Panel -->
       <div id="details-panel">
         <p><strong>Model Details:</strong></p>
@@ -88,11 +87,12 @@
       <span id="loading-text">Loading...</span>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r135/three.min.js"></script>
     <script src="./dist/js-3d-model-viewer.js"></script>
     <script>
       const modelPlayer = this.Js3dModelViewer;
       const viewerElement = document.getElementById('viewer');
-      const rotationCube = document.getElementById('rotation-cube');
+      const rotationCubeElement = document.getElementById('rotation-cube');
       const detailsPanel = document.getElementById('details-panel');
       const loadingStatus = document.getElementById('loading-status');
       const progressBar = document.getElementById('progress-bar');
@@ -107,12 +107,48 @@
         background: 'rgb(80, 80, 80)', // Background color
       });
 
+      // Create rotation cube using THREE.js
+      const cubeScene = new THREE.Scene();
+      const cubeCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      cubeCamera.position.z = 2;
+
+      const cubeRenderer = new THREE.WebGLRenderer({ alpha: true });
+      cubeRenderer.setSize(100, 100);
+      rotationCubeElement.appendChild(cubeRenderer.domElement);
+
+      const cubeGeometry = new THREE.BoxGeometry();
+      const cubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x3CB371,
+        wireframe: true,
+      });
+      const rotationCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      cubeScene.add(rotationCube);
+
+      function animateCube() {
+        cubeRenderer.render(cubeScene, cubeCamera);
+        requestAnimationFrame(animateCube);
+      }
+      animateCube();
+
+      // Rotate the main scene based on cube interaction
+      rotationCubeElement.addEventListener('mousedown', () => {
+        document.addEventListener('mousemove', rotateScene, false);
+        document.addEventListener('mouseup', () => {
+          document.removeEventListener('mousemove', rotateScene, false);
+        });
+      });
+
+      function rotateScene(event) {
+        const rotationX = event.movementX * 0.005;
+        const rotationY = event.movementY * 0.005;
+        modelPlayer.rotateScene(scene, { x: rotationX, y: rotationY, z: 0 });
+      }
+
       // Simulate progress tracking for model loading
       function simulateLoading() {
         let loaded = 0;
         const total = 100;
 
-        // Simulate incremental loading
         const interval = setInterval(() => {
           loaded += 10;
           updateProgress(loaded, total);
@@ -133,8 +169,8 @@
 
       // Complete loading and hide loader
       function completeLoading() {
-        loadingStatus.style.display = 'none'; // Hide loader
-        updateModelDetails('Sample 02', '1024 KB', 'Default Material'); // Example details
+        loadingStatus.style.display = 'none';
+        updateModelDetails('Sample 02', '1024 KB', 'Default Material');
       }
 
       // Update model details panel
@@ -144,26 +180,13 @@
         modelMaterialElement.innerText = `Material: ${material}`;
       }
 
-      // Rotate scene on cube click
-      rotationCube.addEventListener('click', () => {
-        modelPlayer.rotateScene(scene, { x: 30, y: 30, z: 0 }); // Example rotation
-      });
-
-      // Fullscreen mode on 'f' keypress
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'f') {
-          modelPlayer.goFullScreen(viewerElement);
-        }
-      });
-
       // Load Sample 2 model
       modelPlayer.loadObject(
         scene,
-        './assets/sample_02.obj', // Path to model
-        './assets/sample_02.mtl', // Path to material
+        './assets/sample_02.obj',
+        './assets/sample_02.mtl',
         () => {
-          console.log('Model loaded');
-          simulateLoading(); // Simulate loading progress
+          simulateLoading();
         }
       );
     </script>
