@@ -21,11 +21,19 @@
         margin-top: 1em;
         color: white;
       }
-      canvas {
-        display: block;
+      #progress-container {
+        width: 50%;
+        margin: 1em auto;
+        background: #333;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
       }
-      .hidden {
-        display: none;
+      #progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #3CB371;
+        transition: width 0.2s ease;
       }
 	</style>
   </head>
@@ -38,6 +46,9 @@
     <div id="loading-status" class="center">
       <span id="name">Loading Sample 2...</span>
       <span id="loading"></span>
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+      </div>
     </div>
 
     <script src="./dist/js-3d-model-viewer.js"></script>
@@ -46,6 +57,7 @@
       var modelPlayer = this.Js3dModelViewer;
       var nameElement = document.getElementById('name');
       var loadingElement = document.getElementById('loading');
+      var progressBar = document.getElementById('progress-bar');
       var viewerElement = document.getElementById('viewer');
 
       // Prepare the scene
@@ -61,6 +73,7 @@
         }
         var progress = Math.floor(100 * event.detail.loaded / event.detail.total);
         loadingElement.innerHTML = progress + '%';
+        progressBar.style.width = progress + '%'; // Update progress bar width
       });
 
       // Load Sample 2 model automatically on page load
@@ -71,6 +84,7 @@
         function () {
           nameElement.innerHTML = 'Sample 2 Loaded'; // Update loader text
           loadingElement.innerHTML = '';
+          progressBar.style.width = '100%'; // Fill the progress bar on completion
         }
       );
 
