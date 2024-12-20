@@ -39,16 +39,6 @@
         transform: translate(-50%, -50%);
         z-index: 10;
       }
-      #details-panel {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 14px;
-      }
       #rotation-cube {
         position: absolute;
         top: 20px;
@@ -67,17 +57,7 @@
 
   <body>
     <!-- Viewer -->
-    <div id="viewer">
-      <!-- Rotation Cube -->
-      <div id="rotation-cube"></div>
-      <!-- Details Panel -->
-      <div id="details-panel">
-        <p><strong>Model Details:</strong></p>
-        <p id="model-name">Name: Loading...</p>
-        <p id="model-size">Size: Calculating...</p>
-        <p id="model-material">Material: Loading...</p>
-      </div>
-    </div>
+    <div id="viewer"></div>
 
     <!-- Loader -->
     <div id="loading-status" class="center">
@@ -87,40 +67,47 @@
       <span id="loading-text">Loading...</span>
     </div>
 
+    <!-- Rotation Cube -->
+    <div id="rotation-cube"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r135/three.min.js"></script>
-    <script src="./dist/js-3d-model-viewer.js"></script>
     <script>
-      const modelPlayer = this.Js3dModelViewer;
+      // THREE.js setup for the main 3D scene
       const viewerElement = document.getElementById('viewer');
-      const rotationCubeElement = document.getElementById('rotation-cube');
-      const detailsPanel = document.getElementById('details-panel');
-      const loadingStatus = document.getElementById('loading-status');
-      const progressBar = document.getElementById('progress-bar');
-      const loadingText = document.getElementById('loading-text');
-      const modelNameElement = document.getElementById('model-name');
-      const modelSizeElement = document.getElementById('model-size');
-      const modelMaterialElement = document.getElementById('model-material');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      viewerElement.appendChild(renderer.domElement);
 
-      // Prepare the scene
-      const scene = modelPlayer.prepareScene(viewerElement, {
-        grid: true,
-        background: 'rgb(80, 80, 80)', // Background color
-      });
+      // Add a light to the scene
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(10, 10, 10);
+      scene.add(light);
 
-      // Create rotation cube using THREE.js
+      // Add a grid to the scene
+      const gridHelper = new THREE.GridHelper(20, 20);
+      scene.add(gridHelper);
+
+      // Add a sample object to the scene
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      const model = new THREE.Mesh(geometry, material);
+      scene.add(model);
+
+      camera.position.z = 5;
+
+      // Rotation Cube setup
       const cubeScene = new THREE.Scene();
       const cubeCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
       cubeCamera.position.z = 2;
 
       const cubeRenderer = new THREE.WebGLRenderer({ alpha: true });
       cubeRenderer.setSize(100, 100);
-      rotationCubeElement.appendChild(cubeRenderer.domElement);
+      document.getElementById('rotation-cube').appendChild(cubeRenderer.domElement);
 
       const cubeGeometry = new THREE.BoxGeometry();
-      const cubeMaterial = new THREE.MeshBasicMaterial({
-        color: 0x3CB371,
-        wireframe: true,
-      });
+      const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x3CB371, wireframe: true });
       const rotationCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
       cubeScene.add(rotationCube);
 
@@ -130,65 +117,55 @@
       }
       animateCube();
 
-      // Rotate the main scene based on cube interaction
-      rotationCubeElement.addEventListener('mousedown', () => {
-        document.addEventListener('mousemove', rotateScene, false);
-        document.addEventListener('mouseup', () => {
-          document.removeEventListener('mousemove', rotateScene, false);
-        });
+      // Link cube rotation to main scene rotation
+      const controls = { isRotating: false, startX: 0, startY: 0 };
+
+      document.getElementById('rotation-cube').addEventListener('mousedown', (event) => {
+        controls.isRotating = true;
+        controls.startX = event.clientX;
+        controls.startY = event.clientY;
       });
 
-      function rotateScene(event) {
-        const rotationX = event.movementX * 0.005;
-        const rotationY = event.movementY * 0.005;
-        modelPlayer.rotateScene(scene, { x: rotationX, y: rotationY, z: 0 });
+      document.addEventListener('mousemove', (event) => {
+        if (!controls.isRotating) return;
+
+        const deltaX = (event.clientX - controls.startX) * 0.01;
+        const deltaY = (event.clientY - controls.startY) * 0.01;
+
+        model.rotation.y += deltaX;
+        model.rotation.x += deltaY;
+
+        controls.startX = event.clientX;
+        controls.startY = event.clientY;
+      });
+
+      document.addEventListener('mouseup', () => {
+        controls.isRotating = false;
+      });
+
+      // Main animation loop
+      function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
       }
+      animate();
 
-      // Simulate progress tracking for model loading
-      function simulateLoading() {
-        let loaded = 0;
-        const total = 100;
+      // Progress bar logic
+      const progressBar = document.getElementById('progress-bar');
+      const loadingText = document.getElementById('loading-text');
+      const loadingStatus = document.getElementById('loading-status');
 
-        const interval = setInterval(() => {
-          loaded += 10;
-          updateProgress(loaded, total);
-
-          if (loaded >= total) {
-            clearInterval(interval);
-            completeLoading();
-          }
-        }, 300);
-      }
-
-      // Update progress bar and text
-      function updateProgress(loaded, total) {
-        const progress = Math.min(Math.floor((loaded / total) * 100), 100);
+      let progress = 0;
+      const simulateLoading = setInterval(() => {
+        progress += 10;
         progressBar.style.width = `${progress}%`;
         loadingText.innerText = `Loading... ${progress}%`;
-      }
 
-      // Complete loading and hide loader
-      function completeLoading() {
-        loadingStatus.style.display = 'none';
-        updateModelDetails('Sample 02', '1024 KB', 'Default Material');
-      }
-
-      // Update model details panel
-      function updateModelDetails(name, size, material) {
-        modelNameElement.innerText = `Name: ${name}`;
-        modelSizeElement.innerText = `Size: ${size}`;
-        modelMaterialElement.innerText = `Material: ${material}`;
-      }
-
-      // Load Sample 2 model
-      modelPlayer.loadObject(
-        scene,
-        './assets/sample_02.obj',
-        './assets/sample_02.mtl',
-        () => {
-          simulateLoading();
+        if (progress >= 100) {
+          clearInterval(simulateLoading);
+          loadingStatus.style.display = 'none';
         }
-      );
+      }, 300);
     </script>
   </body>
 </html>
