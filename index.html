@@ -17,16 +17,16 @@
         background: #000;
       }
       #progress-container {
-        width: 60%;
-        margin: 10px auto;
-        background: #444;
-        height: 20px;
-        border-radius: 10px;
-        overflow: hidden;
+        width: 50%;
+        margin: auto;
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        background: #444;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
       }
       #progress-bar {
         height: 100%;
@@ -35,8 +35,8 @@
         transition: width 0.2s ease;
       }
       #loading-text {
-        text-align: center;
         color: white;
+        text-align: center;
         position: absolute;
         top: calc(50% + 30px);
         left: 50%;
@@ -48,8 +48,8 @@
         right: 20px;
         width: 100px;
         height: 100px;
-        background: rgba(255, 255, 255, 0.2);
         border: 2px solid #3CB371;
+        background: rgba(255, 255, 255, 0.1);
       }
       canvas {
         display: block;
@@ -57,22 +57,25 @@
     </style>
   </head>
   <body>
+    <!-- Viewer -->
     <div id="viewer"></div>
 
+    <!-- Loader -->
     <div id="progress-container">
       <div id="progress-bar"></div>
     </div>
     <div id="loading-text">Loading...</div>
 
+    <!-- Rotation Cube -->
     <div id="rotation-cube"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r135/three.min.js"></script>
     <script>
-      const viewerElement = document.getElementById('viewer');
-      const rotationCubeElement = document.getElementById('rotation-cube');
-      const progressBar = document.getElementById('progress-bar');
-      const loadingText = document.getElementById('loading-text');
-      const progressContainer = document.getElementById('progress-container');
+      const viewerElement = document.getElementById("viewer");
+      const rotationCubeElement = document.getElementById("rotation-cube");
+      const progressBar = document.getElementById("progress-bar");
+      const loadingText = document.getElementById("loading-text");
+      const progressContainer = document.getElementById("progress-container");
 
       // Main Scene Setup
       const scene = new THREE.Scene();
@@ -81,22 +84,35 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       viewerElement.appendChild(renderer.domElement);
 
+      // Light and Grid
       const light = new THREE.DirectionalLight(0xffffff, 1);
       light.position.set(10, 10, 10);
       scene.add(light);
-
       const gridHelper = new THREE.GridHelper(10, 10);
       scene.add(gridHelper);
 
-      // Add a sample model to the scene
+      // Model in Scene
       const geometry = new THREE.BoxGeometry();
       const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
       const model = new THREE.Mesh(geometry, material);
       scene.add(model);
-
       camera.position.z = 5;
 
-      // Create a 3D rotation cube
+      // Progress Simulation
+      let progress = 0;
+      const simulateLoading = setInterval(() => {
+        progress += 20;
+        progressBar.style.width = `${progress}%`;
+        loadingText.innerText = `Loading... ${progress}%`;
+
+        if (progress >= 100) {
+          clearInterval(simulateLoading);
+          progressContainer.style.display = "none";
+          loadingText.style.display = "none";
+        }
+      }, 500);
+
+      // 3D Rotation Cube
       const cubeScene = new THREE.Scene();
       const cubeCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
       cubeCamera.position.z = 2;
@@ -116,8 +132,8 @@
       }
       animateCube();
 
-      // Link rotation cube to the main scene
-      rotationCubeElement.addEventListener('mousedown', () => {
+      // Rotate Main Model Using Cube
+      rotationCubeElement.addEventListener("mousedown", () => {
         const onMouseMove = (event) => {
           const deltaX = event.movementX * 0.01;
           const deltaY = event.movementY * 0.01;
@@ -125,31 +141,17 @@
           model.rotation.x += deltaY;
         };
 
-        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener("mousemove", onMouseMove);
         document.addEventListener(
-          'mouseup',
+          "mouseup",
           () => {
-            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener("mousemove", onMouseMove);
           },
           { once: true }
         );
       });
 
-      // Simulate loading progress
-      let progress = 0;
-      const simulateLoading = setInterval(() => {
-        progress += 20;
-        progressBar.style.width = `${progress}%`;
-        loadingText.innerText = `Loading... ${progress}%`;
-
-        if (progress >= 100) {
-          clearInterval(simulateLoading);
-          progressContainer.style.display = 'none';
-          loadingText.style.display = 'none';
-        }
-      }, 500);
-
-      // Animate the main scene
+      // Animate Main Scene
       function animate() {
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
