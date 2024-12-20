@@ -7,24 +7,26 @@
       body {
         margin: 0;
         padding: 0;
-        background: white;
-        font-family: Geneva, sans-serif;
+        background: black;
+        font-family: Arial, sans-serif;
       }
       #viewer {
         width: 100%; 
         height: 100vh; /* Full-screen height */
-        margin: auto; 
-        background: #000000;
+        background: #000;
       }
       .center {
         text-align: center;
-        margin-top: 1em;
         color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
       #progress-container {
-        width: 50%;
-        margin: 1em auto;
-        background: #333;
+        width: 60%;
+        margin: 10px auto;
+        background: #444;
         height: 20px;
         border-radius: 10px;
         overflow: hidden;
@@ -33,9 +35,9 @@
         height: 100%;
         width: 0%;
         background: #3CB371;
-        transition: width 0.2s ease;
+        transition: width 0.1s ease;
       }
-	</style>
+    </style>
   </head>
 
   <body>
@@ -44,51 +46,52 @@
 
     <!-- Loader -->
     <div id="loading-status" class="center">
-      <span id="name">Loading Sample 2...</span>
-      <span id="loading"></span>
       <div id="progress-container">
         <div id="progress-bar"></div>
       </div>
+      <span id="loading-text">Loading...</span>
     </div>
 
     <script src="./dist/js-3d-model-viewer.js"></script>
     <script>
-      // Initialize the 3D Model Viewer
       var modelPlayer = this.Js3dModelViewer;
-      var nameElement = document.getElementById('name');
-      var loadingElement = document.getElementById('loading');
-      var progressBar = document.getElementById('progress-bar');
       var viewerElement = document.getElementById('viewer');
+      var loadingStatus = document.getElementById('loading-status');
+      var progressBar = document.getElementById('progress-bar');
+      var loadingText = document.getElementById('loading-text');
 
-      // Prepare the scene
+      // Initialize the viewer
       var scene = modelPlayer.prepareScene(viewerElement, {
         grid: true,
-        background: 'rgb(80, 80, 80)' // Dark background
+        background: 'rgb(80, 80, 80)', // Background color
       });
 
-      // Add event listener for loading progress
-      viewerElement.addEventListener('loading', function (event) {
-        if (event.detail.loaded === 0) {
-          nameElement.innerHTML = 'Loading Sample 2...';
-        }
-        var progress = Math.floor(100 * event.detail.loaded / event.detail.total);
-        loadingElement.innerHTML = progress + '%';
-        progressBar.style.width = progress + '%'; // Update progress bar width
-      });
+      // Show progress during loading
+      function showLoadingProgress(loaded, total) {
+        var progress = Math.floor((loaded / total) * 100);
+        progressBar.style.width = progress + '%';
+        loadingText.innerText = 'Loading... ' + progress + '%';
+      }
 
-      // Load Sample 2 model automatically on page load
+      // Hide loader after loading is complete
+      function hideLoader() {
+        loadingStatus.style.display = 'none';
+      }
+
+      // Load Sample 2 model automatically
       modelPlayer.loadObject(
         scene,
-        './assets/sample_02.obj',  // Path to the model
-        './assets/sample_02.mtl', // Path to the material
-        function () {
-          nameElement.innerHTML = 'Sample 2 Loaded'; // Update loader text
-          loadingElement.innerHTML = '';
-          progressBar.style.width = '100%'; // Fill the progress bar on completion
+        './assets/sample_02.obj', // Path to model
+        './assets/sample_02.mtl', // Path to material
+        function onProgress(loaded, total) {
+          showLoadingProgress(loaded, total); // Update progress
+        },
+        function onComplete() {
+          hideLoader(); // Hide loader when done
         }
       );
 
-      // Enable fullscreen with 'f' key
+      // Fullscreen mode on 'f' keypress
       document.addEventListener('keydown', function (event) {
         if (event.key === 'f') {
           modelPlayer.goFullScreen(viewerElement);
