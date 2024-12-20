@@ -16,53 +16,66 @@
         margin: auto; 
         background: #000000;
       }
-      .button {
-        border-radius: 0.2em;
-        background-color: white;
-        color: #3CB371;
-        border: 3px solid #3CB371;
-        font-weight: bold;
-        padding: 1em;
-        cursor: pointer;
-        display: none; /* Hide unnecessary buttons */
-      }
       .center {
         text-align: center;
-        display: none; /* Hide unnecessary text */
+        margin-top: 1em;
+        color: white;
       }
       canvas {
         display: block;
+      }
+      .hidden {
+        display: none;
       }
 	</style>
   </head>
 
   <body>
+    <!-- Viewer -->
     <div id="viewer"></div>
+
+    <!-- Loader -->
+    <div id="loading-status" class="center">
+      <span id="name">Loading Sample 2...</span>
+      <span id="loading"></span>
+    </div>
 
     <script src="./dist/js-3d-model-viewer.js"></script>
     <script>
       // Initialize the 3D Model Viewer
       var modelPlayer = this.Js3dModelViewer;
+      var nameElement = document.getElementById('name');
+      var loadingElement = document.getElementById('loading');
       var viewerElement = document.getElementById('viewer');
 
       // Prepare the scene
       var scene = modelPlayer.prepareScene(viewerElement, {
         grid: true,
-        background: 'rgb(80, 80, 80)'
+        background: 'rgb(80, 80, 80)' // Dark background
       });
 
-      // Load Sample 2 model
+      // Add event listener for loading progress
+      viewerElement.addEventListener('loading', function (event) {
+        if (event.detail.loaded === 0) {
+          nameElement.innerHTML = 'Loading Sample 2...';
+        }
+        var progress = Math.floor(100 * event.detail.loaded / event.detail.total);
+        loadingElement.innerHTML = progress + '%';
+      });
+
+      // Load Sample 2 model automatically on page load
       modelPlayer.loadObject(
         scene,
-        './assets/sample_02.obj',  // Adjust to correct path
-        './assets/sample_02.mtl', // Material file if needed
+        './assets/sample_02.obj',  // Path to the model
+        './assets/sample_02.mtl', // Path to the material
         function () {
-          console.log('Sample 2 Loaded');
+          nameElement.innerHTML = 'Sample 2 Loaded'; // Update loader text
+          loadingElement.innerHTML = '';
         }
       );
 
-      // Enable fullscreen button (optional)
-      document.addEventListener('keydown', function(event) {
+      // Enable fullscreen with 'f' key
+      document.addEventListener('keydown', function (event) {
         if (event.key === 'f') {
           modelPlayer.goFullScreen(viewerElement);
         }
