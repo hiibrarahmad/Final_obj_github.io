@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>3D Model Viewer</title>
+    <title>3D Model Viewer with Rotation Cube</title>
     <style>
       body {
         margin: 0;
@@ -47,7 +47,6 @@
         height: 100px;
         background: rgba(255, 255, 255, 0.2);
         border: 1px solid #3CB371;
-        cursor: pointer;
       }
       canvas {
         display: block;
@@ -72,24 +71,27 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r135/three.min.js"></script>
     <script>
-      // THREE.js setup for the main 3D scene
       const viewerElement = document.getElementById('viewer');
+      const rotationCubeElement = document.getElementById('rotation-cube');
+      const progressBar = document.getElementById('progress-bar');
+      const loadingText = document.getElementById('loading-text');
+      const loadingStatus = document.getElementById('loading-status');
+
+      // Original model viewer setup
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       viewerElement.appendChild(renderer.domElement);
 
-      // Add a light to the scene
       const light = new THREE.DirectionalLight(0xffffff, 1);
       light.position.set(10, 10, 10);
       scene.add(light);
 
-      // Add a grid to the scene
-      const gridHelper = new THREE.GridHelper(20, 20);
+      const gridHelper = new THREE.GridHelper(10, 10);
       scene.add(gridHelper);
 
-      // Add a sample object to the scene
+      // Add a sample model to the scene
       const geometry = new THREE.BoxGeometry();
       const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
       const model = new THREE.Mesh(geometry, material);
@@ -97,17 +99,20 @@
 
       camera.position.z = 5;
 
-      // Rotation Cube setup
+      // Create rotation cube
       const cubeScene = new THREE.Scene();
       const cubeCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
       cubeCamera.position.z = 2;
 
       const cubeRenderer = new THREE.WebGLRenderer({ alpha: true });
       cubeRenderer.setSize(100, 100);
-      document.getElementById('rotation-cube').appendChild(cubeRenderer.domElement);
+      rotationCubeElement.appendChild(cubeRenderer.domElement);
 
       const cubeGeometry = new THREE.BoxGeometry();
-      const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x3CB371, wireframe: true });
+      const cubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x3CB371,
+        wireframe: true,
+      });
       const rotationCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
       cubeScene.add(rotationCube);
 
@@ -117,44 +122,27 @@
       }
       animateCube();
 
-      // Link cube rotation to main scene rotation
-      const controls = { isRotating: false, startX: 0, startY: 0 };
+      // Link cube rotation to the main scene
+      rotationCubeElement.addEventListener('mousedown', (event) => {
+        const onMove = (e) => {
+          const deltaX = e.movementX * 0.01;
+          const deltaY = e.movementY * 0.01;
+          model.rotation.y += deltaX;
+          model.rotation.x += deltaY;
+        };
 
-      document.getElementById('rotation-cube').addEventListener('mousedown', (event) => {
-        controls.isRotating = true;
-        controls.startX = event.clientX;
-        controls.startY = event.clientY;
+        document.addEventListener('mousemove', onMove);
+
+        document.addEventListener(
+          'mouseup',
+          () => {
+            document.removeEventListener('mousemove', onMove);
+          },
+          { once: true }
+        );
       });
 
-      document.addEventListener('mousemove', (event) => {
-        if (!controls.isRotating) return;
-
-        const deltaX = (event.clientX - controls.startX) * 0.01;
-        const deltaY = (event.clientY - controls.startY) * 0.01;
-
-        model.rotation.y += deltaX;
-        model.rotation.x += deltaY;
-
-        controls.startX = event.clientX;
-        controls.startY = event.clientY;
-      });
-
-      document.addEventListener('mouseup', () => {
-        controls.isRotating = false;
-      });
-
-      // Main animation loop
-      function animate() {
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
-
-      // Progress bar logic
-      const progressBar = document.getElementById('progress-bar');
-      const loadingText = document.getElementById('loading-text');
-      const loadingStatus = document.getElementById('loading-status');
-
+      // Simulated progress bar for model loading
       let progress = 0;
       const simulateLoading = setInterval(() => {
         progress += 10;
@@ -166,6 +154,13 @@
           loadingStatus.style.display = 'none';
         }
       }, 300);
+
+      // Animation loop for the main scene
+      function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
     </script>
   </body>
 </html>
