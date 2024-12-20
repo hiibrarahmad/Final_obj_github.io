@@ -60,13 +60,14 @@
 
       // Create a 3D Box
       const geometry = new THREE.BoxGeometry(1, 1, 1); // Box dimensions: 1x1x1
-      const material = new THREE.MeshBasicMaterial({ color: 0x3cb371, wireframe: true });
+      const material = new THREE.MeshBasicMaterial({ color: 0x3cb371, wireframe: false });
       const cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
 
-      // Lighting (Optional for better visual effects)
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      scene.add(ambientLight);
+      // Add Light (if using a material that needs light)
+      const light = new THREE.PointLight(0xffffff, 1, 100); // White light
+      light.position.set(5, 5, 5); // Light position
+      scene.add(light);
 
       // Animation Loop
       function animate() {
