@@ -16,6 +16,29 @@
         background: #000;
         position: relative;
       }
+      #progress-container {
+        width: 60%;
+        margin: 10px auto;
+        background: #444;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      #progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #3CB371;
+        transition: width 0.1s ease;
+      }
+      .center {
+        text-align: center;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+      }
       #rotation-cube {
         position: absolute;
         top: 10px;
@@ -39,28 +62,6 @@
         padding: 10px;
         border-radius: 8px;
         font-size: 14px;
-      }
-      #progress-container {
-        width: 60%;
-        margin: 10px auto;
-        background: #444;
-        height: 20px;
-        border-radius: 10px;
-        overflow: hidden;
-      }
-      #progress-bar {
-        height: 100%;
-        width: 0%;
-        background: #3CB371;
-        transition: width 0.1s ease;
-      }
-      .center {
-        text-align: center;
-        color: white;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
       }
     </style>
   </head>
@@ -106,38 +107,47 @@
         background: 'rgb(80, 80, 80)', // Background color
       });
 
-      // Show progress during loading
-      function showLoadingProgress(loaded, total) {
-        var progress = Math.floor((loaded / total) * 100);
+      // Simulate progress tracking for model loading
+      function simulateLoading() {
+        var loaded = 0;
+        var total = 100;
+
+        // Simulate incremental loading
+        var interval = setInterval(function () {
+          loaded += 10;
+          updateProgress(loaded, total);
+
+          if (loaded >= total) {
+            clearInterval(interval);
+            completeLoading();
+          }
+        }, 300);
+      }
+
+      // Update progress bar and text
+      function updateProgress(loaded, total) {
+        var progress = Math.min(Math.floor((loaded / total) * 100), 100);
         progressBar.style.width = progress + '%';
         loadingText.innerText = 'Loading... ' + progress + '%';
       }
 
-      // Hide loader after loading is complete
-      function hideLoader() {
-        loadingStatus.style.display = 'none';
+      // Complete loading and hide loader
+      function completeLoading() {
+        loadingStatus.style.display = 'none'; // Hide loader
+        updateModelDetails('Sample 02', '1024 KB', 'Default Material'); // Example details
       }
 
-      // Update details panel with model information
+      // Update model details panel
       function updateModelDetails(name, size, material) {
         modelNameElement.innerText = `Name: ${name}`;
-        modelSizeElement.innerText = `Size: ${size} KB`;
+        modelSizeElement.innerText = `Size: ${size}`;
         modelMaterialElement.innerText = `Material: ${material}`;
       }
 
-      // Load Sample 2 model automatically
-      modelPlayer.loadObject(
-        scene,
-        './assets/sample_02.obj', // Path to model
-        './assets/sample_02.mtl', // Path to material
-        function onProgress(loaded, total) {
-          showLoadingProgress(loaded, total); // Update progress
-        },
-        function onComplete() {
-          hideLoader(); // Hide loader when done
-          updateModelDetails("Sample 02", "1024", "Default Material"); // Example details
-        }
-      );
+      // Rotate scene on cube click
+      rotationCube.addEventListener('click', function () {
+        modelPlayer.rotateScene(scene, { x: 30, y: 30, z: 0 }); // Example rotation
+      });
 
       // Fullscreen mode on 'f' keypress
       document.addEventListener('keydown', function (event) {
@@ -146,10 +156,8 @@
         }
       });
 
-      // Simulate rotation cube interaction
-      rotationCube.addEventListener('click', function () {
-        modelPlayer.rotateScene(scene, { x: 30, y: 30, z: 0 }); // Example rotation
-      });
+      // Simulate loading of Sample 2
+      simulateLoading();
     </script>
   </body>
 </html>
