@@ -10,13 +10,6 @@
         background: white;
         font-family: Geneva, sans-serif;
       }
-      p {
-        margin: 0;
-        padding: 0;
-      }
-      a {
-        color: #3CB371;
-      }
       #viewer {
         width: 100%; 
         height: 100vh; /* Full-screen height */
@@ -31,113 +24,49 @@
         font-weight: bold;
         padding: 1em;
         cursor: pointer;
+        display: none; /* Hide unnecessary buttons */
       }
       .center {
         text-align: center;
-        margin-top: 2em;
+        display: none; /* Hide unnecessary text */
       }
       canvas {
         display: block;
       }
-      pre {
-        padding: 1em;
-        max-width: 900px;
-        margin: auto;
-        margin-top: 4em;
-        font-size: 1.2em;
-      }
-      .footer {
-        padding-bottom: 2em;
-      }
-      .mr2 {
-        margin-right: 2em;
-      }
-      /* Hide other buttons and text */
-      #sample-1-button,
-      #sample-3-button,
-      #sample-4-button,
-      #sample-5-button,
-      #name,
-      #loading {
-        display: none;
-      }
 	</style>
-    <link 
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.min.css"
-    />
   </head>
 
   <body>
-  <div class="content">
+    <div id="viewer"></div>
 
-    <header class="center"><h1>Javascript 3D Model Viewer</h1></header>
+    <script src="./dist/js-3d-model-viewer.js"></script>
+    <script>
+      // Initialize the 3D Model Viewer
+      var modelPlayer = this.Js3dModelViewer;
+      var viewerElement = document.getElementById('viewer');
 
-    <div id="viewer" style="">
-    </div>
+      // Prepare the scene
+      var scene = modelPlayer.prepareScene(viewerElement, {
+        grid: true,
+        background: 'rgb(80, 80, 80)'
+      });
 
-    <div class="center">
-      <button class="button" id="sample-2-button">
-        Sample 2
-      </button>
-    </div>
+      // Load Sample 2 model
+      modelPlayer.loadObject(
+        scene,
+        './assets/sample_02.obj',  // Adjust to correct path
+        './assets/sample_02.mtl', // Material file if needed
+        function () {
+          console.log('Sample 2 Loaded');
+        }
+      );
 
-    <div class="center">
-      <input class="mr2" id="grid-button" type="checkbox" checked>
-        Grid
-      </input>
-      <button class="button" id="fullscreen-button">
-        Go Full Screen
-      </button>
-    </div>
-
-    <footer class="center footer">
-      <a href="https://github.com/cgwire/js-3d-model-viewer">
-        See sources on Github
-      </a>
-    </footer>
-  </div>
-
-  <script src="./dist/js-3d-model-viewer.js"></script>
-  <script>
-  var modelPlayer = this.Js3dModelViewer;
-  var viewerElement = document.getElementById('viewer');
-  var scene = modelPlayer.prepareScene(viewerElement, {
-    grid: true,
-    background: 'rgb(80, 80, 80)'
-  });
-
-  // Sample 2 logic
-  var sample2Button = document.getElementById('sample-2-button');
-  sample2Button.addEventListener('click', function () {
-    modelPlayer.clearScene(scene);
-    modelPlayer.resetCamera(scene);
-    modelPlayer.showGrid(scene);
-    modelPlayer.loadObject(
-      scene, 
-      './assets/sample_02.obj', 
-      './assets/sample_02.mtl',
-      function () {
-        console.log('Sample 2 Loaded');
-    });
-  });
-
-  var fullScreenButton = document.getElementById('fullscreen-button');
-  fullScreenButton.addEventListener('click', function () {
-    modelPlayer.goFullScreen(viewerElement);
-  });
-
-  var gridCheckbox = document.querySelector('#grid-button');
-  gridCheckbox.onchange = function () {
-    if(gridCheckbox.checked) {
-      modelPlayer.showGrid(scene);
-    } else {
-      modelPlayer.hideGrid(scene);
-    }
-  };
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/components/prism-javascript.js"></script>
-</body>
+      // Enable fullscreen button (optional)
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'f') {
+          modelPlayer.goFullScreen(viewerElement);
+        }
+      });
+    </script>
+  </body>
 </html>
