@@ -19,10 +19,9 @@
       }
       #viewer {
         width: 100%; 
-        height: 400px; 
+        height: 100vh; /* Full-screen height */
         margin: auto; 
         background: #000000;
-        margin-top: 2em;
       }
       .button {
         border-radius: 0.2em;
@@ -51,7 +50,16 @@
         padding-bottom: 2em;
       }
       .mr2 {
-        margin-right: 2em;
+        margin-right: 2em;
+      }
+      /* Hide other buttons and text */
+      #sample-1-button,
+      #sample-3-button,
+      #sample-4-button,
+      #sample-5-button,
+      #name,
+      #loading {
+        display: none;
       }
 	</style>
     <link 
@@ -69,26 +77,9 @@
     </div>
 
     <div class="center">
-      <span id="name">Sample 01</span>
-      <span id="loading"></span>
-    </div>
-
-    <div class="center">
-      <button class="button" id="sample-1-button">
-        Sample 1
-      </button>
       <button class="button" id="sample-2-button">
         Sample 2
       </button>
-      <button class="button" id="sample-3-button">
-        Sample 3
-      </button>
-      <button class="button" id="sample-4-button">
-        Sample 4 (.glb)
-      </button>
-      <!--button class="button" id="sample-5-button">
-        Sample 5 (.usdz)
-      </button-->
     </div>
 
     <div class="center">
@@ -100,24 +91,6 @@
       </button>
     </div>
 
-    <div style="margin: 2em auto; max-width: 900px">
-      <pre><code class="language-javascript">
-var modelPlayer = this.Js3dModelViewer
-var viewerElement = document.getElementById('viewer')
-var opts = {
-  grid: true,
-  background: 'rgb(80, 80, 80)'
-}
-var scene = modelPlayer.prepareScene(viewerElement, opts)
-modelPlayer.loadObject(scene, './assets/sample.obj')
-// or modelPlayer.loadGlb(scene, './assets/avocado.glb')
-
-var fullScreenButton = document.getElementById('fullscreen-button')
-fullScreenButton.addEventListener('click', function () {
-  modelPlayer.goFullScreen(viewerElement)
-})</code></pre>
-    </div>
-
     <footer class="center footer">
       <a href="https://github.com/cgwire/js-3d-model-viewer">
         See sources on Github
@@ -127,115 +100,41 @@ fullScreenButton.addEventListener('click', function () {
 
   <script src="./dist/js-3d-model-viewer.js"></script>
   <script>
-  var modelPlayer = this.Js3dModelViewer
-  var nameElement = document.getElementById('name')
-  var loadingElement = document.getElementById('loading')
-  var viewerElement = document.getElementById('viewer')
+  var modelPlayer = this.Js3dModelViewer;
+  var viewerElement = document.getElementById('viewer');
   var scene = modelPlayer.prepareScene(viewerElement, {
     grid: true,
     background: 'rgb(80, 80, 80)'
-  })
+  });
 
-  viewerElement.addEventListener('loading', function (event) {
-    if (event.detail.loaded === 0) {
-      nameElement.innerHTML = 'Loading...'
-    } 
-    var progress = Math.floor(100 * event.detail.loaded / event.detail.total)
-    loadingElement.innerHTML = progress + '%'
-  })
-
-  modelPlayer.loadObject(scene, './assets/sample.obj', null, function () {
-    nameElement.innerHTML = 'Sample 01'
-    loadingElement.innerHTML = ''
-  })
-
-  var fullScreenButton = document.getElementById('fullscreen-button')
-  fullScreenButton.addEventListener('click', function () {
-    modelPlayer.goFullScreen(viewerElement)
-  })
-
-  var sample1Button = document.getElementById('sample-1-button')
-  sample1Button.addEventListener('click', function () {
-    modelPlayer.clearScene(scene)
-    modelPlayer.resetCamera(scene)
-    modelPlayer.showGrid(scene)
-    nameElement.innerHTML = 'Sample 01'
-    modelPlayer.loadObject(scene, './assets/sample.obj', null, function () {
-      loadingElement.innerHTML = ''
-    })
-  })
-
-  var sample2Button = document.getElementById('sample-2-button')
+  // Sample 2 logic
+  var sample2Button = document.getElementById('sample-2-button');
   sample2Button.addEventListener('click', function () {
-    modelPlayer.clearScene(scene)
-    modelPlayer.resetCamera(scene)
-    modelPlayer.showGrid(scene)
-    nameElement.innerHTML = 'Sample 02'
+    modelPlayer.clearScene(scene);
+    modelPlayer.resetCamera(scene);
+    modelPlayer.showGrid(scene);
     modelPlayer.loadObject(
       scene, 
       './assets/sample_02.obj', 
       './assets/sample_02.mtl',
       function () {
-        loadingElement.innerHTML = ''
-    })
-  })
+        console.log('Sample 2 Loaded');
+    });
+  });
 
-  var sample3Button = document.getElementById('sample-3-button')
-  sample3Button.addEventListener('click', function () {
-    modelPlayer.clearScene(scene)
-    modelPlayer.resetCamera(scene)
-    modelPlayer.showGrid(scene)
-    nameElement.innerHTML = 'Sample 03'
-    modelPlayer.loadObject(
-      scene, 
-      './assets/sample_03.obj',
-      './assets/sample_03.mtl',
-      function () {
-        nameElement.innerHTML = 'Sample 03'
-        loadingElement.innerHTML = ''
-    })
-  })
-
-  var sample4Button = document.getElementById('sample-4-button')
-  sample4Button.addEventListener('click', function () {
-    modelPlayer.clearScene(scene)
-    modelPlayer.resetCamera(scene)
-    modelPlayer.showGrid(scene)
-    nameElement.innerHTML = 'Sample 04'
-    modelPlayer.loadGlb(
-      scene, 
-      './assets/avocado.glb',
-      function () {
-        nameElement.innerHTML = 'Sample 04'
-        loadingElement.innerHTML = ''
-    })
-  })
-
-  /*
-  var sample5Button = document.getElementById('sample-5-button')
-  sample5Button.addEventListener('click', function () {
-    modelPlayer.clearScene(scene)
-    modelPlayer.resetCamera(scene)
-    modelPlayer.showGrid(scene)
-    nameElement.innerHTML = 'Sample 05'
-    modelPlayer.loadUsdz(
-      scene, 
-      '/assets/sneakers.usdz',
-      function () {
-        nameElement.innerHTML = 'Sample 05'
-        loadingElement.innerHTML = ''
-    })
-  })
-  */
+  var fullScreenButton = document.getElementById('fullscreen-button');
+  fullScreenButton.addEventListener('click', function () {
+    modelPlayer.goFullScreen(viewerElement);
+  });
 
   var gridCheckbox = document.querySelector('#grid-button');
-  gridCheckbox.onchange = function() {
-  if(gridCheckbox.checked) {
-    modelPlayer.showGrid(scene)
-  } else {
-    modelPlayer.hideGrid(scene)
-  }
-};
+  gridCheckbox.onchange = function () {
+    if(gridCheckbox.checked) {
+      modelPlayer.showGrid(scene);
+    } else {
+      modelPlayer.hideGrid(scene);
+    }
+  };
   </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.js"></script>
