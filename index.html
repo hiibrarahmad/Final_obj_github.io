@@ -90,30 +90,30 @@
 
     <script src="./dist/js-3d-model-viewer.js"></script>
     <script>
-      var modelPlayer = this.Js3dModelViewer;
-      var viewerElement = document.getElementById('viewer');
-      var rotationCube = document.getElementById('rotation-cube');
-      var detailsPanel = document.getElementById('details-panel');
-      var loadingStatus = document.getElementById('loading-status');
-      var progressBar = document.getElementById('progress-bar');
-      var loadingText = document.getElementById('loading-text');
-      var modelNameElement = document.getElementById('model-name');
-      var modelSizeElement = document.getElementById('model-size');
-      var modelMaterialElement = document.getElementById('model-material');
+      const modelPlayer = this.Js3dModelViewer;
+      const viewerElement = document.getElementById('viewer');
+      const rotationCube = document.getElementById('rotation-cube');
+      const detailsPanel = document.getElementById('details-panel');
+      const loadingStatus = document.getElementById('loading-status');
+      const progressBar = document.getElementById('progress-bar');
+      const loadingText = document.getElementById('loading-text');
+      const modelNameElement = document.getElementById('model-name');
+      const modelSizeElement = document.getElementById('model-size');
+      const modelMaterialElement = document.getElementById('model-material');
 
-      // Initialize the viewer
-      var scene = modelPlayer.prepareScene(viewerElement, {
+      // Prepare the scene
+      const scene = modelPlayer.prepareScene(viewerElement, {
         grid: true,
         background: 'rgb(80, 80, 80)', // Background color
       });
 
       // Simulate progress tracking for model loading
       function simulateLoading() {
-        var loaded = 0;
-        var total = 100;
+        let loaded = 0;
+        const total = 100;
 
         // Simulate incremental loading
-        var interval = setInterval(function () {
+        const interval = setInterval(() => {
           loaded += 10;
           updateProgress(loaded, total);
 
@@ -126,9 +126,9 @@
 
       // Update progress bar and text
       function updateProgress(loaded, total) {
-        var progress = Math.min(Math.floor((loaded / total) * 100), 100);
-        progressBar.style.width = progress + '%';
-        loadingText.innerText = 'Loading... ' + progress + '%';
+        const progress = Math.min(Math.floor((loaded / total) * 100), 100);
+        progressBar.style.width = `${progress}%`;
+        loadingText.innerText = `Loading... ${progress}%`;
       }
 
       // Complete loading and hide loader
@@ -145,19 +145,27 @@
       }
 
       // Rotate scene on cube click
-      rotationCube.addEventListener('click', function () {
+      rotationCube.addEventListener('click', () => {
         modelPlayer.rotateScene(scene, { x: 30, y: 30, z: 0 }); // Example rotation
       });
 
       // Fullscreen mode on 'f' keypress
-      document.addEventListener('keydown', function (event) {
+      document.addEventListener('keydown', (event) => {
         if (event.key === 'f') {
           modelPlayer.goFullScreen(viewerElement);
         }
       });
 
-      // Simulate loading of Sample 2
-      simulateLoading();
+      // Load Sample 2 model
+      modelPlayer.loadObject(
+        scene,
+        './assets/sample_02.obj', // Path to model
+        './assets/sample_02.mtl', // Path to material
+        () => {
+          console.log('Model loaded');
+          simulateLoading(); // Simulate loading progress
+        }
+      );
     </script>
   </body>
 </html>
