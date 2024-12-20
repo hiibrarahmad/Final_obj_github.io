@@ -45,8 +45,7 @@
         right: 20px;
         width: 100px;
         height: 100px;
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid #3CB371;
+        border: 2px solid #3CB371;
       }
       canvas {
         display: block;
@@ -88,7 +87,6 @@
       light.position.set(10, 10, 10);
       scene.add(light);
 
-      // Add grid to the scene
       const gridHelper = new THREE.GridHelper(10, 10);
       scene.add(gridHelper);
 
@@ -100,7 +98,7 @@
 
       camera.position.z = 5;
 
-      // Create rotation cube using THREE.js
+      // Rotation cube setup
       const cubeScene = new THREE.Scene();
       const cubeCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
       cubeCamera.position.z = 2;
@@ -110,7 +108,10 @@
       rotationCubeElement.appendChild(cubeRenderer.domElement);
 
       const cubeGeometry = new THREE.BoxGeometry();
-      const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x3CB371, wireframe: true });
+      const cubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x3CB371,
+        wireframe: true,
+      });
       const rotationCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
       cubeScene.add(rotationCube);
 
@@ -120,7 +121,7 @@
       }
       animateCube();
 
-      // Rotate main scene using the cube
+      // Rotate the main model using the cube
       rotationCubeElement.addEventListener('mousedown', (event) => {
         const onMouseMove = (e) => {
           const deltaX = e.movementX * 0.01;
