@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Javascript 3D Model Viewer</title>
+    <title>3D Model Viewer with Rotating Box</title>
     <style>
       body {
         margin: 0;
@@ -11,47 +11,9 @@
         font-family: Arial, sans-serif;
       }
       #viewer {
-        width: 100%; 
-        height: 100vh; /* Full-screen height */
-        background: #000;
-        position: relative;
-      }
-      #progress-container {
-        width: 60%;
-        margin: 10px auto;
-        background: #444;
-        height: 20px;
-        border-radius: 10px;
+        width: 100%;
+        height: 100vh;
         overflow: hidden;
-      }
-      #progress-bar {
-        height: 100%;
-        width: 0%;
-        background: #3CB371;
-        transition: width 0.1s ease;
-      }
-      .center {
-        text-align: center;
-        color: white;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-      }
-      #rotation-cube {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 100px;
-        height: 100px;
-        border: 2px solid #3CB371;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        text-align: center;
-        line-height: 100px;
-        cursor: pointer;
-        font-weight: bold;
       }
       #details-panel {
         position: absolute;
@@ -65,113 +27,67 @@
       }
     </style>
   </head>
-
   <body>
-    <!-- Viewer -->
-    <div id="viewer">
-      <!-- Rotation Cube -->
-      <div id="rotation-cube">↻ Rotate</div>
-      <!-- Details Panel -->
-      <div id="details-panel">
-        <p><strong>Model Details:</strong></p>
-        <p id="model-name">Name: Loading...</p>
-        <p id="model-size">Size: Calculating...</p>
-        <p id="model-material">Material: Loading...</p>
-      </div>
+    <div id="viewer"></div>
+
+    <!-- Details Panel -->
+    <div id="details-panel">
+      <p><strong>Model Details:</strong></p>
+      <p id="model-name">Name: 3D Box</p>
+      <p id="model-size">Size: 1x1x1</p>
+      <p id="model-material">Material: Basic</p>
     </div>
 
-    <!-- Loader -->
-    <div id="loading-status" class="center">
-      <div id="progress-container">
-        <div id="progress-bar"></div>
-      </div>
-      <span id="loading-text">Loading...</span>
-    </div>
-
-    <script src="./dist/js-3d-model-viewer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
     <script>
-      const modelPlayer = this.Js3dModelViewer; // Ensure Js3dModelViewer is initialized correctly
-      const viewerElement = document.getElementById('viewer');
-      const rotationCube = document.getElementById('rotation-cube');
-      const detailsPanel = document.getElementById('details-panel');
-      const loadingStatus = document.getElementById('loading-status');
-      const progressBar = document.getElementById('progress-bar');
-      const loadingText = document.getElementById('loading-text');
-      const modelNameElement = document.getElementById('model-name');
-      const modelSizeElement = document.getElementById('model-size');
-      const modelMaterialElement = document.getElementById('model-material');
+      // Scene Setup
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x202020);
 
-      // Prepare the scene
-      const scene = modelPlayer.prepareScene(viewerElement, {
-        grid: true,
-        background: 'rgb(80, 80, 80)', // Background color
-      });
-
-      let modelObject; // Hold reference to the loaded model
-
-      // Simulate progress tracking for model loading
-      function simulateLoading() {
-        let loaded = 0;
-        const total = 100;
-
-        // Simulate incremental loading
-        const interval = setInterval(() => {
-          loaded += 10;
-          updateProgress(loaded, total);
-
-          if (loaded >= total) {
-            clearInterval(interval);
-            completeLoading();
-          }
-        }, 300);
-      }
-
-      // Update progress bar and text
-      function updateProgress(loaded, total) {
-        const progress = Math.min(Math.floor((loaded / total) * 100), 100);
-        progressBar.style.width = `${progress}%`;
-        loadingText.innerText = `Loading... ${progress}%`;
-      }
-
-      // Complete loading and hide loader
-      function completeLoading() {
-        loadingStatus.style.display = 'none'; // Hide loader
-        updateModelDetails('Sample 02', '1024 KB', 'Default Material'); // Example details
-      }
-
-      // Update model details panel
-      function updateModelDetails(name, size, material) {
-        modelNameElement.innerText = `Name: ${name}`;
-        modelSizeElement.innerText = `Size: ${size}`;
-        modelMaterialElement.innerText = `Material: ${material}`;
-      }
-
-      // Rotate scene on cube click
-      rotationCube.addEventListener('click', () => {
-        if (modelObject) {
-          // Rotate the model object
-          modelPlayer.rotateObject(modelObject, { x: 0, y: Math.PI / 4, z: 0 }); // Example 45-degree rotation
-        }
-      });
-
-      // Fullscreen mode on 'f' keypress
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'f') {
-          modelPlayer.goFullScreen(viewerElement);
-        }
-      });
-
-      // Load Sample 2 model
-      modelPlayer.loadObject(
-        scene,
-        './assets/sample_02.obj', // Path to model
-        './assets/sample_02.mtl', // Path to material
-        (object) => {
-          modelObject = object; // Save reference to the loaded model
-          console.log('Model loaded');
-          simulateLoading(); // Simulate loading progress
-        }
+      // Camera Setup
+      const camera = new THREE.PerspectiveCamera(
+        75, // Field of view
+        window.innerWidth / window.innerHeight, // Aspect ratio
+        0.1, // Near clipping plane
+        1000 // Far clipping plane
       );
+      camera.position.z = 5;
+
+      // Renderer Setup
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('viewer').appendChild(renderer.domElement);
+
+      // Create a 3D Box
+      const geometry = new THREE.BoxGeometry(1, 1, 1); // Box dimensions: 1x1x1
+      const material = new THREE.MeshBasicMaterial({ color: 0x3cb371, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+
+      // Lighting (Optional for better visual effects)
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+
+      // Animation Loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate the cube
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+
+        renderer.render(scene, camera);
+      }
+
+      // Resize Handler
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // Start Animation
+      animate();
     </script>
   </body>
 </html>
